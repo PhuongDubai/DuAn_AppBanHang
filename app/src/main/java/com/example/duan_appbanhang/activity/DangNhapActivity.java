@@ -1,5 +1,6 @@
 package com.example.duan_appbanhang.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -17,6 +18,11 @@ import com.example.duan_appbanhang.R;
 import com.example.duan_appbanhang.retrfit.ApiBanHang;
 import com.example.duan_appbanhang.retrfit.RetrofitClient;
 import com.example.duan_appbanhang.utils.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -32,6 +38,8 @@ public class DangNhapActivity extends AppCompatActivity {
     ImageView passwordIcon;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     private boolean passwordShowing = false;
+    FirebaseAuth firebaseAuth;
+    FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,21 +71,44 @@ public class DangNhapActivity extends AppCompatActivity {
                     //lưu dang nhap
                     Paper.book().write("email", str_email);
                     Paper.book().write("pass", str_pass);
-                    compositeDisposable.add(apiBanHang.dangNhap(str_email, str_pass).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(userModel -> {
-                        if (userModel.isSuccess()) {
-                            Utils.user_current = userModel.getResult().get(0);
-                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }, throwable -> {
-                        Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (user != null) {
+                        // user da co dang nhap
+                        dangnhap(str_email, str_pass);
+                    } else {
+                        //user da dang xuat
+                        firebaseAuth.signInWithEmailAndPassword(str_email, str_pass)
+                                .addOnCompleteListener(DangNhapActivity.this, new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+                                            dangnhap(str_email, str_pass);
+                                        }
+                                    }
+                                });
 
-                    }));
+                    }
+
+
                 }
 
             }
         });
+    }
+    private void dangnhap(String str_email, String str_pass) {
+        compositeDisposable.add(apiBanHang.dangNhap(str_email, str_pass).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(userModel -> {
+            if (userModel.isSuccess()) {
+
+                Utils.user_current = userModel.getResult().get(0);
+                Paper.book().write("user",userModel.getResult().get(0));
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }, throwable -> {
+            Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
+        }));
+
     }
 
     private void initView() {
@@ -88,6 +119,8 @@ public class DangNhapActivity extends AppCompatActivity {
         email = findViewById(R.id.edtEmail);
         btnDangnhap = findViewById(R.id.btnDangNhap);
         passwordIcon = findViewById(R.id.passwordIcon);
+        firebaseAuth = FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
         //icon show pass
         passwordIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,10 +140,7 @@ public class DangNhapActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-//read dât
+//read data
         if (Paper.book().read("email") != null && Paper.book().read("pass") != null) {
             email.setText(Paper.book().read("email"));
             pass.setText(Paper.book().read("pass"));
@@ -118,6 +148,14 @@ public class DangNhapActivity extends AppCompatActivity {
         }
 
     }
+
+
+
+
+//read dât
+
+
+
 
     @Override
     protected void onResume() {

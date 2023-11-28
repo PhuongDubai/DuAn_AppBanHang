@@ -15,12 +15,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duan_appbanhang.R;
+import com.example.duan_appbanhang.mode.NotiSendData;
 import com.example.duan_appbanhang.retrfit.ApiBanHang;
+import com.example.duan_appbanhang.retrfit.ApiPushNotification;
 import com.example.duan_appbanhang.retrfit.RetrofitClient;
+import com.example.duan_appbanhang.retrfit.RetrofitClientNoti;
 import com.example.duan_appbanhang.utils.Utils;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -79,24 +84,45 @@ public class ThanhToanActivity extends AppCompatActivity {
                     String str_sdt = Utils.user_current.getMobile();
                     int id = Utils.user_current.getId();
                     Log.d("test", new Gson().toJson(Utils.mangmuahang));
-                    compositeDisposable.add(apiBanHang.createOder(str_email, str_sdt, String.valueOf(tongtien), id, str_diachi, totalItem, new Gson().toJson(Utils.mangmuahang))
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(
-                                    userModel -> {
-                                        Toast.makeText(ThanhToanActivity.this, "them don hang thanh cong", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
+                    compositeDisposable.add(apiBanHang.createOder(str_email, str_sdt, String.valueOf(tongtien), id, str_diachi, totalItem, new Gson().toJson(Utils.mangmuahang)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(userModel -> {
+                        pushNotiToUser();
+                        Toast.makeText(ThanhToanActivity.this, "them don hang thanh cong", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(intent);
+                        finish();
 
-                                    }, throwable -> {
-                                        Toast.makeText(ThanhToanActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                            )
-                    );
+                    }, throwable -> {
+                        Toast.makeText(ThanhToanActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    }));
                 }
             }
         });
+
+    }
+
+    private void pushNotiToUser() {
+        //gettoken
+        compositeDisposable.add(apiBanHang.gettoken(1).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(userModel -> {
+            if (userModel.isSuccess()) {
+                for (int i =0; i < userModel.getResult().size();i++){
+                    Map<String, String> data = new HashMap<>();
+                    data.put("title", "thong bao");
+                    data.put("body", "Ban co don hang moi");
+                    NotiSendData notiSendData = new NotiSendData(userModel.getResult().get(i).getToken(), data);
+                    ApiPushNotification apiPushNotification = RetrofitClientNoti.getInstance().create(ApiPushNotification.class);
+                    compositeDisposable.add(apiPushNotification.sendNotification(notiSendData).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(notiResponse -> {
+
+                    }, throwable -> {
+                        Log.d("logg", throwable.getMessage());
+                    }));
+                }
+
+            }
+
+        }, throwable -> {
+            Log.d("loggg", throwable.getMessage());
+        }));
+
 
     }
 

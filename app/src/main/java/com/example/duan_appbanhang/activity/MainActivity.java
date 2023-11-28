@@ -13,6 +13,8 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -31,15 +33,20 @@ import com.example.duan_appbanhang.mode.LoaiSp;
 import com.example.duan_appbanhang.mode.LoaiSpModel;
 import com.example.duan_appbanhang.mode.SanPhamMoi;
 import com.example.duan_appbanhang.mode.SanPhamMoiModel;
+import com.example.duan_appbanhang.mode.User;
 import com.example.duan_appbanhang.retrfit.ApiBanHang;
 import com.example.duan_appbanhang.retrfit.RetrofitClient;
 import com.example.duan_appbanhang.utils.Utils;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.nex3z.notificationbadge.NotificationBadge;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -71,6 +78,13 @@ public class MainActivity extends AppCompatActivity {
         apiBanHang = RetrofitClient.getInstance(Utils.BASE_URL).create(ApiBanHang.class);
 
 
+        Paper.init(this);
+        if (Paper.book().read("user")!= null){
+            User user = Paper.book().read("user");
+            Utils.user_current = user;
+
+        }
+        getToken();
         AnhXa();
         ActionBar();
 
@@ -108,9 +122,13 @@ public class MainActivity extends AppCompatActivity {
                         Intent donhang = new Intent(getApplicationContext(), XemDonActivity.class);
                         startActivity(donhang);
                         break;
-                    case 6:
+
+                    case 7:
+                        Paper.book().delete("user");
+                        FirebaseAuth.getInstance().signOut();
                         Intent dangxuat = new Intent(getApplicationContext(), DangNhapActivity.class);
                         startActivity(dangxuat);
+                        finish();
                         break;
                 }
             }
@@ -135,6 +153,29 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Không kết nối được với sever " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                 ));
+    }
+    private  void getToken(){
+        FirebaseMessaging.getInstance().getToken()
+                .addOnSuccessListener(new OnSuccessListener<String>() {
+                    @Override
+                    public void onSuccess(String s) {
+                        if(!TextUtils.isEmpty(s)){
+                            compositeDisposable.add(apiBanHang.updateToken(Utils.user_current.getId(),s)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(
+                                            messageModel -> {
+
+                                            },throwable -> {
+                                                Log.d("log",throwable.getMessage());
+
+                                            }
+                                    ));
+
+                        }
+                    }
+                });
+
     }
 
     private void getLoaiSanPham() {

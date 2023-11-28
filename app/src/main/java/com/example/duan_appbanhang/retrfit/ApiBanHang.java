@@ -1,6 +1,7 @@
 package com.example.duan_appbanhang.retrfit;
 
 import com.example.duan_appbanhang.mode.DonHangModel;
+import com.example.duan_appbanhang.mode.MessageModel;
 import com.example.duan_appbanhang.mode.LoaiSpModel;
 import com.example.duan_appbanhang.mode.SanPhamMoiModel;
 import com.example.duan_appbanhang.mode.UserModel;
@@ -32,7 +33,8 @@ public interface ApiBanHang {
           @Field("email") String email,
           @Field("pass") String pass,
           @Field("username") String username,
-          @Field("mobile") String mobile
+          @Field("mobile") String mobile,
+          @Field("uid") String uid
   );
 
 
@@ -66,6 +68,21 @@ public interface ApiBanHang {
   @FormUrlEncoded
   Observable<SanPhamMoiModel> search(
           @Field("search") String search
+
+  );
+  @POST("updatetoken.php")
+  @FormUrlEncoded
+  Observable<MessageModel> updateToken(
+          @Field("id") int id,
+          @Field("token") String token
+
+
+  );
+
+  @POST("gettoken.php")
+  @FormUrlEncoded
+  Observable<UserModel> gettoken(
+          @Field("status") int status
 
   );
 

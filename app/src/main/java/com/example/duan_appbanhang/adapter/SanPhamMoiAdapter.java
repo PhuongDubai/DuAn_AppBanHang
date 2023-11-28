@@ -16,6 +16,7 @@ import com.example.duan_appbanhang.Interface.ItemClickListener;
 import com.example.duan_appbanhang.R;
 import com.example.duan_appbanhang.activity.ChiTietActivity;
 import com.example.duan_appbanhang.mode.SanPhamMoi;
+import com.example.duan_appbanhang.utils.Utils;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -43,7 +44,12 @@ public class SanPhamMoiAdapter extends RecyclerView.Adapter<SanPhamMoiAdapter.My
         holder.txtten.setText(sanPhamMoi.getTensp());
         DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
         holder.txtgia.setText("Giá: " + decimalFormat.format(Double.parseDouble(sanPhamMoi.getGiasp())) + " VND");
-        Glide.with(context).load(sanPhamMoi.getHinhanh()).into(holder.imghinhanh);
+        if(sanPhamMoi.getHinhanh().contains("http")){
+            Glide.with(context).load(sanPhamMoi.getHinhanh()).into(holder.imghinhanh);
+        }else {
+            String hinh = Utils.BASE_URL+"imges/"+sanPhamMoi.getHinhanh();
+            Glide.with(context).load(hinh).into(holder.imghinhanh);
+        }
         holder.setItemClickListener(new ItemClickListener() {
             @Override
             public void onClick(View view, int pos, boolean isLongClick) {

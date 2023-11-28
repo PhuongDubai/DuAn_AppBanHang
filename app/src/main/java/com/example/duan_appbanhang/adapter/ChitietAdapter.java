@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.duan_appbanhang.R;
 import com.example.duan_appbanhang.mode.Item;
+import com.example.duan_appbanhang.utils.Utils;
 
 import java.util.List;
 
@@ -39,7 +40,12 @@ public class ChitietAdapter extends RecyclerView.Adapter<ChitietAdapter.MyViewHo
         Item item = itemList.get(position);
         holder.txttensp.setText(item.getTensp()+"");
         holder.txtsoluong.setText("Số lượng: "+item.getSoluong()+"");
-        Glide.with(context).load(item.getHinhanh()).into(holder.imgchitiet);
+        if(item.getHinhanh().contains("http")){
+            Glide.with(context).load(item.getHinhanh()).into(holder.imgchitiet);
+        }else {
+            String hinh = Utils.BASE_URL+"imges/"+item.getHinhanh();
+            Glide.with(context).load(hinh).into(holder.imgchitiet);
+        }
 
     }
 

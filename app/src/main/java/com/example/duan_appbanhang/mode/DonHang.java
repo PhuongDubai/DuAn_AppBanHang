@@ -7,8 +7,17 @@ public class DonHang {
     int iduser;
     String diachi ;
     String sodienthoai;
+    int trangthai;
     String tongtien ;
     List<Item> item;
+
+    public int getTrangthai() {
+        return trangthai;
+    }
+
+    public void setTrangthai(int trangthai) {
+        this.trangthai = trangthai;
+    }
 
     public int getId() {
         return id;

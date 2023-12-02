@@ -99,6 +99,10 @@ public class SearchActivity extends AppCompatActivity {
                                 sanPhamMoiList = sanPhamMoiModel.getResult();
                                 adapterDt = new DienThoaiAdapter(getApplicationContext(),sanPhamMoiList);
                                 recyclerView.setAdapter(adapterDt);
+                            }else {
+                                Toast.makeText(this, sanPhamMoiModel.getMessage(), Toast.LENGTH_SHORT).show();
+                                sanPhamMoiList.clear();
+                                adapterDt.notifyDataSetChanged();
                             }
 
                         },throwable -> {

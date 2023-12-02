@@ -17,15 +17,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/idDonhang"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:text="Đơn hàng : 123"
-                android:textColor="@android:color/holo_red_light"
-                android:textStyle="bold"/>
+
+                >
+                <TextView
+                    android:id="@+id/idDonhang"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Đơn hàng : 123"
+                    android:textColor="@android:color/holo_red_light"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/idTrangthai"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Trạng thái : 123"
+                    android:textColor="@android:color/holo_red_light"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:textStyle="bold"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycleview_chitiet"
                 android:layout_width="match_parent"

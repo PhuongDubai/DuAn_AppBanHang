@@ -2,7 +2,7 @@ package com.example.duan_appbanhang.mode;
 
 import java.util.List;
 
-public class SanPhamMoiModel {
+public class    SanPhamMoiModel {
     boolean success ;
     String message ;
     List<SanPhamMoi> result;

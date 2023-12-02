@@ -6,9 +6,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.example.duan_appbanhang.Interface.ItemClickDeleteListener;
 import com.example.duan_appbanhang.R;
 import com.example.duan_appbanhang.adapter.DonHangAdapter;
 import com.example.duan_appbanhang.retrfit.ApiBanHang;
@@ -44,14 +48,51 @@ public class XemDonActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         donHangModel -> {
-                            DonHangAdapter adapter = new DonHangAdapter(getApplicationContext(), donHangModel.getResult());
+                            DonHangAdapter adapter = new DonHangAdapter(getApplicationContext(), donHangModel.getResult(), new ItemClickDeleteListener() {
+                                @Override
+                                public void onClickDelete(int iddonhang) {
+                                    showDeleteOrder(iddonhang);
+                                }
+                            });
                             redonhang.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
 
                         }, throwable -> {
 
                         }
 
                 ));
+    }
+
+    private void showDeleteOrder(int iddonhang) {
+        PopupMenu popupMenu = new PopupMenu(this,redonhang.findViewById(R.id.idTrangthai));
+        popupMenu.inflate(R.menu.menu_delete);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if (menuItem.getItemId() == R.id.deleteOrder);
+                deleteOrder(iddonhang);
+                return false;
+            }
+        });
+    }
+
+    private void deleteOrder(int iddonhang) {
+        compositeDisposable.add(apiBanHang.getdeleteOrder(iddonhang)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        messageModel -> {
+                            if (messageModel.isSuccess()){
+                                getOrder();
+                            }
+
+                        },throwable -> {
+                            Log.d("loggg",throwable.getMessage());
+
+                        }
+                )
+        );
     }
 
     private void initToolbar() {

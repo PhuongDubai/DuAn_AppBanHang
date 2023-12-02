@@ -58,8 +58,6 @@ public class ChiTietActivity extends AppCompatActivity {
             for (int i = 0; i < Utils.manggiohang.size(); i++) {
                 if (Utils.manggiohang.get(i).getIdsp() == sanPhamMoi.getId()) {
                     Utils.manggiohang.get(i).setSoluong(soluong + Utils.manggiohang.get(i).getSoluong());
-                    long gia = Long.parseLong(sanPhamMoi.getGiasp());
-                    Utils.manggiohang.get(i).setGiasp(gia);
                     flag = true;
                 }
             }

@@ -2,7 +2,7 @@ package com.example.duan_appbanhang.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
+
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.duan_appbanhang.R;
+import com.example.duan_appbanhang.mode.GioHang;
 import com.example.duan_appbanhang.mode.NotiSendData;
 import com.example.duan_appbanhang.retrfit.ApiBanHang;
 import com.example.duan_appbanhang.retrfit.ApiPushNotification;
@@ -27,19 +28,22 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+
 
 public class ThanhToanActivity extends AppCompatActivity {
     Toolbar toolbar;
     TextView txttongtien, txtsodt, txtemail;
     EditText edtDiachi;
-    Button btnDathang;
+    Button btnDathang , btnmomo;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     ApiBanHang apiBanHang;
     long tongtien;
     int totalItem;
+
 
 
     @Override
@@ -58,6 +62,8 @@ public class ThanhToanActivity extends AppCompatActivity {
             totalItem = totalItem + Utils.mangmuahang.get(i).getSoluong();
         }
     }
+
+
 
     private void initControl() {
         setSupportActionBar(toolbar);
@@ -86,7 +92,17 @@ public class ThanhToanActivity extends AppCompatActivity {
                     Log.d("test", new Gson().toJson(Utils.mangmuahang));
                     compositeDisposable.add(apiBanHang.createOder(str_email, str_sdt, String.valueOf(tongtien), id, str_diachi, totalItem, new Gson().toJson(Utils.mangmuahang)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(userModel -> {
                         pushNotiToUser();
-                        Toast.makeText(ThanhToanActivity.this, "them don hang thanh cong", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ThanhToanActivity.this, "Đặt hàng thành công", Toast.LENGTH_SHORT).show();
+
+                        //clear mang gio hang
+                        for (int i = 0 ; i <Utils.mangmuahang.size(); i ++){
+                            GioHang gioHang = Utils.mangmuahang.get(i);
+                            if (Utils.manggiohang.contains(gioHang)){
+                                Utils.manggiohang.remove(gioHang);
+                            }
+                        }
+                        Utils.mangmuahang.clear();
+                        Paper.book().write("giohang", Utils.manggiohang);
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -106,8 +122,8 @@ public class ThanhToanActivity extends AppCompatActivity {
             if (userModel.isSuccess()) {
                 for (int i =0; i < userModel.getResult().size();i++){
                     Map<String, String> data = new HashMap<>();
-                    data.put("title", "thong bao");
-                    data.put("body", "Ban co don hang moi");
+                    data.put("title", "Thông báo");
+                    data.put("body", "Bạn có đơn hàng mới");
                     NotiSendData notiSendData = new NotiSendData(userModel.getResult().get(i).getToken(), data);
                     ApiPushNotification apiPushNotification = RetrofitClientNoti.getInstance().create(ApiPushNotification.class);
                     compositeDisposable.add(apiPushNotification.sendNotification(notiSendData).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(notiResponse -> {
@@ -134,6 +150,7 @@ public class ThanhToanActivity extends AppCompatActivity {
         txtemail = findViewById(R.id.txtemail);
         edtDiachi = findViewById(R.id.edtdiachi);
         btnDathang = findViewById(R.id.btnDatHang);
+        btnmomo = findViewById(R.id.btnmomo);
     }
 
     @Override

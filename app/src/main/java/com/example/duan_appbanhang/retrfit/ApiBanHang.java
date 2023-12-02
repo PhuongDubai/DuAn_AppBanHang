@@ -86,4 +86,10 @@ public interface ApiBanHang {
 
   );
 
+  @POST("deleteorder.php")
+  @FormUrlEncoded
+  Observable<MessageModel> getdeleteOrder(
+          @Field("iddonhang") int id
+
+  );
 }

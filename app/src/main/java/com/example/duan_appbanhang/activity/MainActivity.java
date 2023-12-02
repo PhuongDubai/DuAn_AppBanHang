@@ -118,12 +118,12 @@ public class MainActivity extends AppCompatActivity {
                         laptop.putExtra("loai",2);
                         startActivity(laptop);
                         break;
-                    case 5:
+                    case 3:
                         Intent donhang = new Intent(getApplicationContext(), XemDonActivity.class);
                         startActivity(donhang);
                         break;
 
-                    case 7:
+                    case 4:
                         Paper.book().delete("user");
                         FirebaseAuth.getInstance().signOut();
                         Intent dangxuat = new Intent(getApplicationContext(), DangNhapActivity.class);
@@ -214,6 +214,11 @@ public class MainActivity extends AppCompatActivity {
         // khoi tao list
         mangloaisp = new ArrayList<>();
         mangSpMoi = new ArrayList<>();
+        if (Paper.book().read("giohang") != null){
+            Utils.manggiohang = Paper.book().read("giohang");
+        }
+
+
         if (Utils.manggiohang == null){
             Utils.manggiohang = new ArrayList<>();
         }else {
